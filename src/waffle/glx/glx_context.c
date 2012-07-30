@@ -75,7 +75,7 @@ glx_context_fill_attrib_list(
         }
     }
 
-    attrib_list[i++] = GLX_NONE;
+    attrib_list[i++] = 0;
     return true;
 }
 
