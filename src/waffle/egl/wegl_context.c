@@ -34,32 +34,6 @@
 #include "wegl_context.h"
 #include "wegl_util.h"
 
-static bool
-bind_api(int32_t waffle_context_api)
-{
-    bool ok = true;
-
-    switch (waffle_context_api) {
-        case WAFFLE_CONTEXT_OPENGL:
-            ok &= eglBindAPI(EGL_OPENGL_API);
-            break;
-        case WAFFLE_CONTEXT_OPENGL_ES1:
-        case WAFFLE_CONTEXT_OPENGL_ES2:
-        case WAFFLE_CONTEXT_OPENGL_ES3:
-            ok &= eglBindAPI(EGL_OPENGL_ES_API);
-            break;
-        default:
-            wcore_error_internal("waffle_context_api has bad value #x%x",
-                                 waffle_context_api);
-            return false;
-    }
-
-    if (!ok)
-        wegl_emit_error("eglBindAPI");
-
-    return ok;
-}
-
 static EGLContext
 create_real_context(struct wegl_config *config,
                     EGLContext share_ctx)
@@ -106,7 +80,7 @@ create_real_context(struct wegl_config *config,
             return EGL_NO_CONTEXT;
     }
 
-    ok = bind_api(waffle_context_api);
+    ok = wegl_bind_api(waffle_context_api);
     if (!ok)
         return false;
 
@@ -140,6 +114,9 @@ wegl_context_create(struct wcore_platform *wc_plat,
                                    share_ctx
                                        ? share_ctx->egl
                                        : NULL);
+
+    ctx->waffle_context_api = wc_config->attrs.context_api;
+
     if (!ctx->egl)
         goto fail;
 

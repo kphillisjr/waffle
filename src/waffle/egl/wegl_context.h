@@ -38,6 +38,7 @@ struct wegl_display;
 struct wegl_context {
     struct wcore_context wcore;
     EGLContext egl;
+    int32_t waffle_context_api;
 };
 
 DEFINE_CONTAINER_CAST_FUNC(wegl_context,

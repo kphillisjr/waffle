@@ -23,6 +23,8 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include "waffle_enum.h"
+
 #include "wcore_error.h"
 
 #include "wegl_context.h"
@@ -68,20 +70,52 @@ wegl_emit_error(const char *egl_func_call)
 }
 
 bool
+wegl_bind_api(int32_t waffle_context_api)
+{
+    bool ok = true;
+
+    switch (waffle_context_api) {
+        case WAFFLE_CONTEXT_OPENGL:
+            ok &= eglBindAPI(EGL_OPENGL_API);
+            break;
+        case WAFFLE_CONTEXT_OPENGL_ES1:
+        case WAFFLE_CONTEXT_OPENGL_ES2:
+        case WAFFLE_CONTEXT_OPENGL_ES3:
+            ok &= eglBindAPI(EGL_OPENGL_ES_API);
+            break;
+        default:
+            wcore_error_internal("waffle_context_api has bad value #x%x",
+                                 waffle_context_api);
+            return false;
+    }
+
+    if (!ok)
+        wegl_emit_error("eglBindAPI");
+
+    return ok;
+}
+
+bool
 wegl_make_current(struct wcore_platform *wc_plat,
                   struct wcore_display *wc_dpy,
                   struct wcore_window *wc_window,
                   struct wcore_context *wc_ctx)
 {
     bool ok;
+    struct wegl_context *ctx = wegl_context(wc_ctx);
     EGLSurface surface = wc_window ? wegl_window(wc_window)->egl : NULL;
+
+    if (ctx) {
+        ok = wegl_bind_api(ctx->waffle_context_api);
+        if (!ok)
+            return false;
+
+    }
 
     ok = eglMakeCurrent(wegl_display(wc_dpy)->egl,
                         surface,
                         surface,
-                        wc_ctx
-                            ? wegl_context(wc_ctx)->egl
-                            : NULL);
+                        ctx ? ctx->egl : NULL);
     if (!ok)
         wegl_emit_error("eglMakeCurrent");
 

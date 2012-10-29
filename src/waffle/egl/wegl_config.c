@@ -151,24 +151,28 @@ choose_real_config(struct wegl_display *dpy,
         EGL_NONE,
     };
 
-    switch (attrs->context_api) {
-        case WAFFLE_CONTEXT_OPENGL:
-            attrib_list[renderable_index] = EGL_OPENGL_BIT;
-            break;
-        case WAFFLE_CONTEXT_OPENGL_ES1:
-            attrib_list[renderable_index] = EGL_OPENGL_ES_BIT;
-            break;
-        case WAFFLE_CONTEXT_OPENGL_ES2:
-            attrib_list[renderable_index] = EGL_OPENGL_ES2_BIT;
-            break;
-        case WAFFLE_CONTEXT_OPENGL_ES3:
-            attrib_list[renderable_index] = EGL_OPENGL_ES3_BIT_KHR;
-            break;
-        default:
-            wcore_error_internal("waffle_context_api has bad value %#x",
-                                 attrs->context_api);
-            return NULL;
-    }
+//    switch (attrs->context_api) {
+//        case WAFFLE_CONTEXT_OPENGL:
+//            attrib_list[renderable_index] = EGL_OPENGL_BIT;
+//            break;
+//        case WAFFLE_CONTEXT_OPENGL_ES1:
+//            attrib_list[renderable_index] = EGL_OPENGL_ES_BIT;
+//            break;
+//        case WAFFLE_CONTEXT_OPENGL_ES2:
+//            attrib_list[renderable_index] = EGL_OPENGL_ES2_BIT;
+//            break;
+//        case WAFFLE_CONTEXT_OPENGL_ES3:
+//            attrib_list[renderable_index] = EGL_OPENGL_ES3_BIT_KHR;
+//            break;
+//        default:
+//            wcore_error_internal("waffle_context_api has bad value %#x",
+//                                 attrs->context_api);
+//            return NULL;
+//    }
+
+    attrib_list[renderable_index] = EGL_OPENGL_BIT
+                                  | EGL_OPENGL_ES_BIT
+                                  | EGL_OPENGL_ES2_BIT;
 
     EGLint num_configs = 0;
     ok &= eglChooseConfig(dpy->egl,

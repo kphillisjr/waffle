@@ -40,6 +40,10 @@ struct wcore_window;
 void
 wegl_emit_error(const char *egl_func_call);
 
+
+bool
+wegl_bind_api(int32_t waffle_context_api);
+
 bool
 wegl_make_current(struct wcore_platform *wc_plat,
                   struct wcore_display *wc_dpy,

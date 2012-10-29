@@ -1,5 +1,8 @@
 .PHONY: all
-all: gl_basic simple-x11-egl
+all: cross-api gl_basic simple-x11-egl
+
+cross-api: cross-api.c
+	$(CC) $(shell pkg-config --cflags --libs waffle-1) -o cross-api cross-api.c
 
 gl_basic: gl_basic.c
 	$(CC) $(shell pkg-config --cflags --libs waffle-1) -o gl_basic gl_basic.c
