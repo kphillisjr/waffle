@@ -1,0 +1,100 @@
+Message-ID: <50A53E44.3050307@whitecape.org>
+Date: Thu, 15 Nov 2012 11:11:00 -0800
+From: Kenneth Graunke <kenneth@whitecape.org>
+To: Chad Versace <chad.versace@linux.intel.com>,
+ Paul Berry <stereotype441@gmail.com>,
+ Ben Widawsky <ben@bwidawsk.net>
+Subject: multilib waffle pkgbuild
+
+Hey guys,
+
+Here's a PKGBUILD for Waffle that builds both 32-bit and 64-bit versions
+from git.
+
+I don't expect this will get upstreamed as it doesn't follow Arch
+conventions whatsoever (it's not using the -git suffix or lib32- prefix,
+and combines both in one package).
+
+The reason I do things this way is that it keeps both 32 and 64 versions
+in sync.
+
+--Ken
+
+# Maintainer: Chad Versace <chad.versace@linux.intel.com>
+
+pkgname='waffle'
+pkgver='20121115'
+pkgrel=1
+pkgdesc='a library for choosing window system and OpenGL API at runtime'
+arch=('x86_64')
+url='http://people.freedesktop.org/~chadversary/waffle'
+license=('BSD')
+
+depends=(
+  'libgl' # for GLX
+  'libegl'
+  'libx11'
+  'libxcb'
+  'lib32-libgl' # for GLX
+  'lib32-libegl'
+  'lib32-libx11'
+  'lib32-libxcb'
+  )
+makedepends=('cmake' 'xcb-proto')
+_gitroot='git://people.freedesktop.org/~chadversary/waffle'
+_gitname='waffle'
+
+build() {
+    msg 'Hailing the original waffle source...'
+    if [ -d $startdir/src/$_gitname ] ; then
+        cd $_gitname && git fetch origin && git checkout . && git checkout origin/master
+        msg "The local files are updated."
+    else
+        git clone $_gitroot
+    fi
+
+    msg 'GIT checkout done or server timeout'
+
+    msg 'Building the 32-bit version'
+    rm -rf $startdir/src/$_gitname-32
+    cp -rH $startdir/src/$_gitname $startdir/src/$_gitname-32
+    cd $startdir/src/$_gitname-32
+
+    cmake \
+      -DCMAKE_C_FLAGS=-m32 \
+      -DCMAKE_INSTALL_PREFIX=/usr \
+      -DCMAKE_INSTALL_LIBDIR=/usr/lib32 \
+      -DCMAKE_BUILD_TYPE=Release \
+      -Dwaffle_has_glx=1 \
+      -Dwaffle_has_x11_egl=1 \
+      -Dwaffle_has_wayland=0 \
+      -Dwaffle_build_examples=0
+    make
+
+    msg 'Installing the 32-bit version'
+    make DESTDIR="$pkgdir/" install
+    install -m755 -d "$pkgdir/usr/share/licenses/$pkgname"
+    install -m644 "$pkgdir/usr/share/doc/waffle-1/LICENSE.txt" \
+                  "$pkgdir/usr/share/licenses/$pkgname/LICENSE.txt"
+
+    msg 'Building the 64-bit version'
+    cd $startdir/src/$_gitname
+
+    cmake \
+      -DCMAKE_INSTALL_PREFIX=/usr \
+      -DCMAKE_INSTALL_LIBDIR=/usr/lib \
+      -DCMAKE_BUILD_TYPE=Release \
+      -Dwaffle_has_glx=1 \
+      -Dwaffle_has_x11_egl=1 \
+      -Dwaffle_has_wayland=0 \
+      -Dwaffle_build_examples=0
+    make
+
+    msg 'Installing the 64-bit version'
+    make DESTDIR="$pkgdir/" install
+    install -m755 -d "$pkgdir/usr/share/licenses/$pkgname"
+    install -m644 "$pkgdir/usr/share/doc/waffle-1/LICENSE.txt" \
+                  "$pkgdir/usr/share/licenses/$pkgname/LICENSE.txt"
+}
+
+# vim:set ts=2 sw=2 et:
