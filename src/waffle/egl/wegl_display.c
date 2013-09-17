@@ -24,6 +24,7 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <assert.h>
+#include <stdio.h>
 
 #include "wcore_error.h"
 #include "wcore_platform.h"
@@ -81,6 +82,38 @@ wegl_display_init(struct wegl_display *dpy,
     ok = get_extensions(dpy);
     if (!ok)
 	goto fail;
+
+    EGLConfig configs[512];
+    EGLint num_configs;
+
+    printf("eglGetConfigs\n");
+    printf("-----------------------------\n");
+    eglGetConfigs(dpy->egl, configs, 512, &num_configs);
+    for (int i = 0; i < num_configs; ++i) {
+        EGLint id, r, g, b, a;
+        eglGetConfigAttrib(dpy->egl, configs[i], EGL_CONFIG_ID, &id);
+        eglGetConfigAttrib(dpy->egl, configs[i], EGL_RED_SIZE, &r);
+        eglGetConfigAttrib(dpy->egl, configs[i], EGL_GREEN_SIZE, &g);
+        eglGetConfigAttrib(dpy->egl, configs[i], EGL_BLUE_SIZE, &b);
+        eglGetConfigAttrib(dpy->egl, configs[i], EGL_ALPHA_SIZE, &a);
+        printf("%3d: %3d %3d %3d %3d %3d\n", i, id, r, g, b, a);
+    }
+
+    printf("eglChooseConfig(r=8, g=8, b=8)\n");
+    printf("-----------------------------\n");
+    eglChooseConfig(dpy->egl, (EGLint[]){EGL_RED_SIZE, 8, EGL_GREEN_SIZE, 8, EGL_BLUE_SIZE, 8, EGL_NONE},
+                    configs, 512, &num_configs);
+    for (int i = 0; i < num_configs; ++i) {
+        EGLint id, r, g, b, a;
+        eglGetConfigAttrib(dpy->egl, configs[i], EGL_CONFIG_ID, &id);
+        eglGetConfigAttrib(dpy->egl, configs[i], EGL_RED_SIZE, &r);
+        eglGetConfigAttrib(dpy->egl, configs[i], EGL_GREEN_SIZE, &g);
+        eglGetConfigAttrib(dpy->egl, configs[i], EGL_BLUE_SIZE, &b);
+        eglGetConfigAttrib(dpy->egl, configs[i], EGL_ALPHA_SIZE, &a);
+        printf("%3d: %3d %3d %3d %3d %3d\n", i, id, r, g, b, a);
+    }
+
+    abort();
 
     return true;
 
