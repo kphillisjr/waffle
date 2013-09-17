@@ -164,6 +164,11 @@ target_link_libraries(${waffle_libname} ${waffle_libdeps})
 
 set_target_properties(${waffle_libname}
     PROPERTIES
+
+    # -Bsymbolic prevents programs from overriding definitions
+    # inside libwaffle.
+    LINK_FLAGS "-Bsymbolic"
+
     LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
     SOVERSION ${waffle_soversion}
     VERSION ${waffle_soversion}.${waffle_minor_version}.${waffle_patch_version})
